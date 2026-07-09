@@ -1,0 +1,1 @@
+var e=`https://cheatcl.frenda.workers.dev`,t=`65b9ef2cb18704367157cc6f`;export{t as n,e as t};
