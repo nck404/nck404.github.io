@@ -1,1 +1,0 @@
-import{Q as e}from"./D1JD0qlM.js";import"./CkyghgZs.js";var t=e([]);function n(e,n=`success`,r=3e3){let i=crypto.randomUUID();t.update(t=>[...t,{id:i,message:e,type:n}]),setTimeout(()=>{t.update(e=>e.filter(e=>e.id!==i))},r)}export{t as n,n as t};
