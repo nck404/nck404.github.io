@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neven Web ClickGUI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080710;
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --primary: #5f3dc4;
+            --primary-glow: rgba(95, 61, 196, 0.4);
+            --accent: #15aabf;
+            --accent-glow: rgba(21, 170, 191, 0.4);
+            --text-color: #f8f9fa;
+            --text-muted: #adb5bd;
+            --success: #2b8a3e;
+            --error: #c92a2a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(95, 61, 196, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(21, 170, 191, 0.15) 0%, transparent 40%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #748ffc, #15aabf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1.5px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--panel-border);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--error);
+            box-shadow: 0 0 8px var(--error);
+            transition: all 0.3s ease;
+        }
+
+        .status-dot.connected {
+            background-color: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 24px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            color: var(--text-color);
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary);
+            background: rgba(95, 61, 196, 0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary), #3b5bdb);
+            border-color: transparent;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .content-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+            min-height: 500px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .module-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .module-name {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+            border-color: transparent;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        .module-settings {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .setting-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .setting-value {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .setting-control {
+            width: 100%;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--accent-glow);
+            transition: all 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .checkbox-container input {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">NEVEN CLI</div>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <div class="sidebar" id="sidebar">
+            </div>
+
+            <div class="content-panel">
+                <div class="modules-grid" id="modulesGrid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws;
+        let clientData = {
+            settings: {},
+            modules: []
+        };
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const sidebar = document.getElementById('sidebar');
+        const modulesGrid = document.getElementById('modulesGrid');
+        let activeCategory = '';
+
+        function connect() {
+            ws = new WebSocket('ws://localhost:12345');
+
+            ws.onopen = () => {
+                statusDot.classList.add('connected');
+                statusText.innerText = 'Connected';
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'init') {
+                    clientData.settings = data.settings;
+                    clientData.modules = data.modules;
+                    if (!activeCategory && clientData.modules.length > 0) {
+                        activeCategory = clientData.modules[0].category;
+                    }
+                    renderSidebar();
+                    renderModules();
+                } else if (data.type === 'update') {
+                    clientData.settings[data.key] = data.value;
+                    updateSettingUI(data.key, data.value);
+                } else if (data.type === 'module_state') {
+                    const mod = clientData.modules.find(m => m.name === data.name);
+                    if (mod) {
+                        mod.enabled = data.enabled;
+                        const toggle = document.getElementById(`toggle-${data.name}`);
+                        if (toggle) toggle.checked = data.enabled;
+                    }
+                }
+            };
+
+            ws.onclose = () => {
+                statusDot.classList.remove('connected');
+                statusText.innerText = 'Disconnected';
+                setTimeout(connect, 2000);
+            };
+        }
+
+        const moduleSettingsMap = {
+            "Aim Assist": [
+                { key: "AA_smooth", label: "Smoothness", type: "range", min: 1, max: 30, step: 0.5 },
+                { key: "AA_fov", label: "FOV Circle Size", type: "range", min: 5, max: 180, step: 1 },
+                { key: "AA_aimDistance", label: "Aim Distance", type: "range", min: 2, max: 8, step: 0.1 },
+                { key: "AA_weaponOnly", label: "Weapon Only", type: "checkbox" },
+                { key: "AA_visibilityCheck", label: "Visibility Check", type: "checkbox" }
+            ],
+            "Reach": [
+                { key: "Reach_ReachDistance", label: "Reach Distance", type: "range", min: 3.0, max: 6.0, step: 0.05 }
+            ],
+            "Left Auto Clicker": [
+                { key: "LAC_leftMinCps", label: "Min CPS", type: "range", min: 1, max: 25, step: 1 },
+                { key: "LAC_leftMaxCps", label: "Max CPS", type: "range", min: 1, max: 25, step: 1 },
+                { key: "LAC_weaponOnly", label: "Weapon Only", type: "checkbox" }
+            ],
+            "Right Auto Clicker": [
+                { key: "RAC_rightMinCps", label: "Min CPS", type: "range", min: 1, max: 25, step: 1 },
+                { key: "RAC_rightMaxCps", label: "Max CPS", type: "range", min: 1, max: 25, step: 1 },
+                { key: "RAC_blocksOnly", label: "Blocks Only", type: "checkbox" }
+            ],
+            "ESP": [
+                { key: "ESP_Box", label: "Show Box", type: "checkbox" },
+                { key: "ESP_HealthBar", label: "Health Bar", type: "checkbox" },
+                { key: "ESP_BoxType", label: "Box Type", type: "select", options: { 0: "Dynamic 2D", 1: "3D" } }
+            ]
+        };
+
+        function renderSidebar() {
+            const categories = [...new Set(clientData.modules.map(m => m.category))];
+            sidebar.innerHTML = '';
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `nav-btn ${cat === activeCategory ? 'active' : ''}`;
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    activeCategory = cat;
+                    renderSidebar();
+                    renderModules();
+                };
+                sidebar.appendChild(btn);
+            });
+        }
+
+        function renderModules() {
+            modulesGrid.innerHTML = '';
+            const filtered = clientData.modules.filter(m => m.category === activeCategory);
+            filtered.forEach(mod => {
+                const card = document.createElement('div');
+                card.className = 'module-card';
+
+                let settingsHtml = '';
+                const settingsList = moduleSettingsMap[mod.name] || [];
+                if (settingsList.length > 0) {
+                    settingsHtml = `<div class="module-settings">`;
+                    settingsList.forEach(s => {
+                        const val = clientData.settings[s.key] !== undefined ? clientData.settings[s.key] : '';
+                        if (s.type === 'range') {
+                            settingsHtml += `
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <span>${s.label}</span>
+                                        <span class="setting-value" id="val-${s.key}">${val}</span>
+                                    </div>
+                                    <input type="range" class="setting-control" id="ctrl-${s.key}" min="${s.min}" max="${s.max}" step="${s.step}" value="${val}" oninput="onSettingChange('${s.key}', parseFloat(this.value))">
+                                </div>
+                            `;
+                        } else if (s.type === 'checkbox') {
+                            settingsHtml += `
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="ctrl-${s.key}" ${val ? 'checked' : ''} onchange="onSettingChange('${s.key}', this.checked)">
+                                    <span>${s.label}</span>
+                                </label>
+                            `;
+                        } else if (s.type === 'select') {
+                            let opts = '';
+                            Object.entries(s.options).forEach(([k, v]) => {
+                                opts += `<option value="${k}" ${val == k ? 'selected' : ''}>${v}</option>`;
+                            });
+                            settingsHtml += `
+                                <div class="setting-row">
+                                    <div class="setting-label">
+                                        <span>${s.label}</span>
+                                    </div>
+                                    <select id="ctrl-${s.key}" onchange="onSettingChange('${s.key}', parseInt(this.value))">
+                                        ${opts}
+                                    </select>
+                                </div>
+                            `;
+                        }
+                    });
+                    settingsHtml += `</div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="module-header">
+                        <span class="module-name">${mod.name}</span>
+                        <label class="switch">
+                            <input type="checkbox" id="toggle-${mod.name}" ${mod.enabled ? 'checked' : ''} onchange="toggleModule('${mod.name}')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    ${settingsHtml}
+                `;
+                modulesGrid.appendChild(card);
+            });
+        }
+
+        function toggleModule(name) {
+            ws.send(JSON.stringify({
+                type: 'toggle_module',
+                name: name
+            }));
+        }
+
+        function onSettingChange(key, value) {
+            const valSpan = document.getElementById(`val-${key}`);
+            if (valSpan) valSpan.innerText = value;
+            ws.send(JSON.stringify({
+                type: 'update_setting',
+                key: key,
+                value: value
+            }));
+        }
+
+        function updateSettingUI(key, value) {
+            const ctrl = document.getElementById(`ctrl-${key}`);
+            if (ctrl) {
+                if (ctrl.type === 'checkbox') {
+                    ctrl.checked = value;
+                } else {
+                    ctrl.value = value;
+                }
+            }
+            const valSpan = document.getElementById(`val-${key}`);
+            if (valSpan) valSpan.innerText = value;
+        }
+
+        connect();
+    </script>
+</body>
+</html>
